@@ -1,0 +1,5 @@
+ml/MSFT.csv
+MSFT.csv
+ml/stock/*
+ml/__pycache__/*
+ml/.ipynb_checkpoints/*
