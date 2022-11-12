@@ -40,37 +40,20 @@ class Traning:
         model_lstm.compile(loss='mean_squared_error', optimizer='adam')
         return model_lstm
 
-    def SaveData(self, model):
-        model.save(self.modelpath)
+    def SaveData(self, model, modelPath):
+        model.save(modelPath)
     
-    def FetchData(self, name):
+    def FetchData(self, name, stockCsvPath):
         data = yf.download(tickers=name, period="max", interval="1d")
-        self.stockCsvPath = os.path.join(self.stockPath, name + ".csv")
-        if os.path.exists(self.stockCsvPath):
-            os.remove(self.stockCsvPath)
-        data.to_csv(self.stockCsvPath)
-    
-    ##reuse data if its alread trained
-    def CheckDataExists(self, name):
-        self.stockPath = os.path.join(dirname, 'stock', name)
-        self.modelpath = os.path.join(self.stockPath, name + ".pickel")
-        if os.path.exists(self.modelpath):
-            return True
-        os.mkdir(self.stockPath)
-        return False
-    
-    def loadModel(self):
-        return keras.models.load_model(self.modelpath)
+        if os.path.exists(stockCsvPath):
+            os.remove(stockCsvPath)
+        data.to_csv(stockCsvPath)
 
-    def Train(self, name):
-        
-        ##traning part is over
-        if self.CheckDataExists(name):
-            return self.loadModel()
-
-        self.FetchData(name)
+    def Train(self, name, sotckPath, modelPath, stockCsvPath):
+        os.mkdir(sotckPath)
+        self.FetchData(name, stockCsvPath)
         ##load data
-        df_final = pd.read_csv(self.stockCsvPath,na_values=['null'],index_col='Date',parse_dates=True,infer_datetime_format=True)
+        df_final = pd.read_csv(stockCsvPath,na_values=['null'],index_col='Date',parse_dates=True,infer_datetime_format=True)
         test = df_final
         target_adj_close = pd.DataFrame(test['Adj Close'])
         # selecting Feature Columns
@@ -106,9 +89,5 @@ class Traning:
         score_lstm= model_lstm.evaluate(X_tst_t, y_test, batch_size=1)
 
         print('LSTM: %f'%score_lstm)
-        self.SaveData(model_lstm)
+        self.SaveData(model_lstm, modelPath)
         return model_lstm
-
-train = Traning()
-
-train.Train("MARUTI.NS")
