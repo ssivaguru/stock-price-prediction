@@ -1,23 +1,39 @@
+#!/usr/bin/env python
+
 import asyncio
- 
+
 import websockets
- 
-# create handler for each connection
- 
-async def handler(websocket, path):
- 
-    data = await websocket.recv()
- 
-    reply = f"Data recieved as:  {data}!"
- 
-    await websocket.send(reply)
- 
- 
- 
-start_server = websockets.serve(handler, "localhost", 8000)
- 
- 
- 
-asyncio.get_event_loop().run_until_complete(start_server)
- 
-asyncio.get_event_loop().run_forever()
+
+def handleMessage(message):
+    splitString = message.split()
+    resMessage = ""
+    if splitString[0] == "predict":
+        ##call predictor class
+        print("check with predictor")
+        resMessage = "Handled Message"
+    else:    
+        print("Unhandled message")
+        resMessage = "Unhandled message"
+    
+    return resMessage
+
+async def handler(websocket):
+    while True:
+        try:
+            message = await websocket.recv()
+        except websockets.ConnectionClosedOK:
+            print("websocket connection closed")
+            break
+
+        resp = handleMessage(message)
+
+        await websocket.send(resp)
+
+
+async def main():
+    async with websockets.serve(handler, "", 8000):
+        await asyncio.Future()  # run forever
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
