@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import asyncio
-
 import websockets
 
 def handleMessage(message):
@@ -36,4 +35,8 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+        print("test")
+    except KeyboardInterrupt:
+        print("error")
