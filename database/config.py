@@ -1,1 +1,0 @@
-DBURI = "mongodb://localhost:27017/"
