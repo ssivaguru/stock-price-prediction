@@ -49,9 +49,8 @@ func (ws *ApiStruct) setupRoutes(router *gin.Engine) {
 func (ws *ApiStruct) StartServer() error {
 	router := gin.Default()
 	ws.setupRoutes(router)
-	router.Run("localhost:8010")
 
-	return nil
+	return router.Run("localhost:8010")
 }
 
 func (ws *ApiStruct) Close() {
