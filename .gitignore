@@ -4,3 +4,4 @@ ml/stock/*
 ml/__pycache__/*
 ml/.ipynb_checkpoints/*
 database/main
+database/const
