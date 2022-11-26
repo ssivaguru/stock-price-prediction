@@ -17,3 +17,8 @@ server
 
 data 
     -will contain the methods to fetch data
+
+
+Default Configuration 
+    DB-Server :- port 8080
+    Prediction-API-Server := port 8010
