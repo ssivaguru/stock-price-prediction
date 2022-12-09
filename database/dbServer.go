@@ -22,14 +22,13 @@ func getJson(data map[string]string) []byte {
 func (s *DbServer) handlePredict(c *gin.Context) {
 
 	bodyMap := c.Request.URL.Query()
-
+	log.Println(bodyMap)
 	if _, ok := bodyMap["name"]; !ok {
 		c.JSON(400, "{Msg: Malformed URL}")
 		return
 	}
 
 	//jsut check if its already created
-
 	data, err := s.Dbclient.GetData(bodyMap.Get("name"))
 
 	if err == nil {
