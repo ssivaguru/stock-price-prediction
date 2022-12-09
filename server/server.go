@@ -10,6 +10,7 @@ type ServerStruct struct {
 }
 
 func (s *ServerStruct) StartServer() {
-	err := s.ApiServer.StartServer()
+	msgCh := make(chan string, 1)
+	err := s.ApiServer.StartServer(msgCh)
 	s.connError <- err
 }
