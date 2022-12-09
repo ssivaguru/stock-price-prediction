@@ -1,8 +1,9 @@
 package main
 
 const (
-	StatusTraning = 1
-	StatusReady   = 2
+	StatusTraning  = 1
+	StatusUpdating = 2
+	StatusReady    = 3
 )
 
 const (
