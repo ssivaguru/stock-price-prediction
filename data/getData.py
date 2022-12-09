@@ -19,10 +19,6 @@ import yfinance as yf
 # 5m, 15, and 30m are availavble for 60 days
 
 # Get the data
-data = yf.download(tickers="MARUTI.NS", period="3mo", interval="60m")
+data = yf.download(tickers="MARUTI.NS", period="max", interval="1d")
 
-# Print the data
-print("Printing tail")
-print(data.tail())
-print("Printing head")
-print(data.head())
+data.to_csv("siva.csv")
