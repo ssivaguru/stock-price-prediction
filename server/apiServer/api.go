@@ -38,7 +38,7 @@ func (ws *ApiStruct) handlePredit(c *gin.Context) {
 		return
 	}
 
-	resp, err := http.Get("http://localhost:8080/api/predict?name=YoloPolo")
+	resp, err := http.Get("http://localhost:8080/api/predict?name=" + paramPairs.Get("name"))
 	if err != nil {
 		log.Println(err)
 		c.Data(500, gin.MIMEJSON, getJson(map[string]string{"error": "DB server down"}))
@@ -68,11 +68,22 @@ func (ws *ApiStruct) handlePredit(c *gin.Context) {
 			return
 			//then we have a trained data
 		} else if data["Status"] == 3 {
-			c.Data(201, gin.MIMEJSON, getJson(map[string]string{"status": "model is ready so lets start predicting"}))
+			c.Data(200, gin.MIMEJSON, getJson(map[string]string{"status": "model is ready so lets start predicting"}))
 			ws.PubServer.PublishMessage("predict", body)
 			return
 		}
 
+	}
+
+	//means we have to push to kafka
+	if resp.StatusCode == 201 {
+		c.Data(200, gin.MIMEJSON, getJson(map[string]string{"status": "model is ready so lets start predicting"}))
+		if ws.PubServer.PublishMessage("train", body) {
+			log.Println("data has been ploted")
+		} else {
+			log.Println("data has not been ploted")
+		}
+		return
 	}
 	c.JSON(resp.StatusCode, data)
 }
@@ -96,6 +107,8 @@ func (ws *ApiStruct) setupRoutes(router *gin.Engine, msgCh chan string) {
 }
 
 func (ws *ApiStruct) StartServer(msgCh chan string) error {
+	ws.PubServer.PublishMessage("train", []byte("Test"))
+	return nil
 	router := gin.Default()
 	ws.setupRoutes(router, msgCh)
 
