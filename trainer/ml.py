@@ -131,15 +131,22 @@ def predict(stockName):
     return np.array(Next5DaysPrice).reshape(FutureTimeSteps, 1)
 
 
+print("running application with ", sys.argv)
 ##we either train or update
 if sys.argv[1] == "predict":
     downloadData(sys.argv[2])
     train(sys.argv[2])
     resp = predict(sys.argv[2])
-    print(resp)
+    print(":OUT:")
+    for x in range(FutureTimeSteps):
+        print(resp[x])
 else:
     remove(sys.argv[2])
     downloadData(sys.argv[2])
     train(sys.argv[2])
     resp = predict(sys.argv[2])
+    print(":OUT:")
+    for x in range(FutureTimeSteps):
+        print(resp[x])
+    
 
