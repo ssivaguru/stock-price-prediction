@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -24,11 +25,11 @@ func main() {
 	//trainData("MARUTI.NS", nil)
 	//return
 	trainCh := make(chan int, 10)
-	predictCh := make(chan int, 50)
+	//predictCh := make(chan int, 50)
 	for true {
 		fmt.Println("Consuming topic")
-		consumePrediction(predictCh)
-		time.Sleep(time.Second * 10)
+		//consumePrediction(predictCh)
+		//time.Sleep(time.Second * 10)
 		consumeTrain(trainCh)
 	}
 }
@@ -80,12 +81,6 @@ func consumeTrain(train chan int) {
 
 	fmt.Println("started dailer")
 
-	dialer := &kafka.Dialer{
-		Timeout:   5 * time.Second,
-		DualStack: true,
-		TLS:       &tls.Config{},
-	}
-
 	// initialize a new reader with the brokers and topic
 	// the groupID identifies the consumer and prevents
 	// it from receiving duplicate messages
@@ -93,7 +88,6 @@ func consumeTrain(train chan int) {
 		Brokers: []string{brokerAddress},
 		Topic:   "train",
 		GroupID: "my-group",
-		Dialer:  dialer,
 	})
 	fmt.Println("reader complete")
 	count := 0
@@ -116,6 +110,7 @@ func consumeTrain(train chan int) {
 		}
 		// after receiving the message, log its value
 		fmt.Println("received: ", string(msg.Value))
+		go trainData(string(msg.Value), train)
 	}
 }
 
@@ -136,7 +131,9 @@ func trainData(msg string, close chan int) {
 	err := cmd.Run()
 
 	if err != nil {
-		println(err.Error())
+		fmt.Println(err.Error())
+		fmt.Println(b2.String())
+
 		return
 	}
 
@@ -155,8 +152,17 @@ func trainData(msg string, close chan int) {
 	}
 
 	resp := make(map[string]interface{})
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Println(pwd)
+
 	resp["name"] = msg
 	resp["predict"] = predict
+	resp["path"] = pwd + "/" + msg + ".h5"
 	out, err := json.Marshal(resp)
 
 	if err != nil {
@@ -182,7 +188,7 @@ func trainData(msg string, close chan int) {
 
 	fmt.Println(response.StatusCode)
 
-	//<-close
+	<-close
 }
 
 func predictData(msg string, close chan int) {

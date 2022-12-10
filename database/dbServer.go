@@ -46,7 +46,8 @@ func (s *DbServer) handlePredict(c *gin.Context) {
 		return
 	}
 
-	err = s.Dbclient.InsertData(&database.Stock{ID: primitive.NewObjectIDFromTimestamp(time.Now()), Name: bodyMap.Get("name"), Path: "", Status: StatusTraning, UpdatedAt: time.Now(), Requesting_user: nil, Predicted_val: nil})
+	newStockData := &database.Stock{ID: primitive.NewObjectIDFromTimestamp(time.Now()), Name: bodyMap.Get("name"), Path: "", Status: StatusTraning, UpdatedAt: time.Now(), Requesting_user: nil, Predicted_val: nil}
+	err = s.Dbclient.InsertData(newStockData)
 
 	if err != nil {
 		log.Println("handleCreateStock:: error creating stock ", err)
@@ -54,7 +55,8 @@ func (s *DbServer) handlePredict(c *gin.Context) {
 		return
 	}
 
-	c.Data(201, gin.MIMEJSON, getJson(map[string]string{"error": "Created stock record"}))
+	outByte, err := json.Marshal(newStockData)
+	c.Data(200, gin.MIMEJSON, outByte)
 }
 
 func (s *DbServer) handleDescribe(c *gin.Context) {

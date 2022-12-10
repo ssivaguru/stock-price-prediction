@@ -60,32 +60,33 @@ func (ws *ApiStruct) handlePredit(c *gin.Context) {
 		c.Data(500, gin.MIMEJSON, getJson(map[string]string{"error": "error getting json data"}))
 		return
 	}
+
+	log.Println(data)
 	//then this is new data start prediction
 	if _, ok := data["Status"]; ok {
-		if data["Status"] == 1 {
-			c.Data(201, gin.MIMEJSON, getJson(map[string]string{"status": "traning the data model"}))
-			ws.PubServer.PublishMessage("train", body)
+
+		//train of the data
+		if data["Status"].(float64) == 1 {
+			c.Data(200, gin.MIMEJSON, getJson(map[string]string{"status": "kindly retry after sometime. Preparing data"}))
+			ws.PubServer.PublishMessage("train", []byte(paramPairs.Get("name")))
 			return
 			//then we have a trained data
-		} else if data["Status"] == 3 {
+		}
+	}
+
+	/*
+		//means we have to push to kafka
+		if resp.StatusCode == 201 {
 			c.Data(200, gin.MIMEJSON, getJson(map[string]string{"status": "model is ready so lets start predicting"}))
-			ws.PubServer.PublishMessage("predict", body)
+			if ws.PubServer.PublishMessage("train", []byte(paramPairs.Get("name"))) {
+				log.Println("data has been ploted")
+			} else {
+				log.Println("data has not been ploted")
+			}
 			return
 		}
-
-	}
-
-	//means we have to push to kafka
-	if resp.StatusCode == 201 {
-		c.Data(200, gin.MIMEJSON, getJson(map[string]string{"status": "model is ready so lets start predicting"}))
-		if ws.PubServer.PublishMessage("train", body) {
-			log.Println("data has been ploted")
-		} else {
-			log.Println("data has not been ploted")
-		}
-		return
-	}
-	c.JSON(resp.StatusCode, data)
+	*/
+	c.JSON(resp.StatusCode, data["Predicted_val"])
 }
 
 func handleDescribe(c *gin.Context) {
@@ -107,8 +108,6 @@ func (ws *ApiStruct) setupRoutes(router *gin.Engine, msgCh chan string) {
 }
 
 func (ws *ApiStruct) StartServer(msgCh chan string) error {
-	ws.PubServer.PublishMessage("train", []byte("Test"))
-	return nil
 	router := gin.Default()
 	ws.setupRoutes(router, msgCh)
 

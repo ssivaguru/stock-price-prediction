@@ -4,12 +4,13 @@ import (
 	"context"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/segmentio/kafka-go"
 )
 
 const (
-	topic         = "train-stock"
+	topic         = "train"
 	brokerAddress = "localhost:9092"
 )
 
@@ -38,8 +39,8 @@ func (pub *producerStruct) PublishMessage(topic string, msg []byte) bool {
 	// to decide which partition (and consequently, which broker)
 	// the message gets published on
 	err := pub.w.WriteMessages(context.Background(), kafka.Message{
-		Topic: topic,
-		Key:   []byte("Name"),
+		Key: []byte(strconv.Itoa(1)),
+
 		// create an arbitrary message payload for the value
 		Value: msg,
 	})
